@@ -1,14 +1,13 @@
 package calculator;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 public interface Parser {
     void readInputFile(String inputFilePath);
 
-    Map<String, Map<String, Double>> getTable();
+    Map<String, Double> getCredit();
 
-    Map<String, Integer> getNamesOrder();
+    Map<String, Double> getDebit();
 
-    Map<Integer, String> getNamesOrderReverse();
+    Map<String, Map<String, Double>> getOutputTable();
 }

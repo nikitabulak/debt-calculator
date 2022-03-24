@@ -1,5 +1,5 @@
-import newCalculator.DebtCalculator;
-import newCalculator.FromFileDebtCalculator;
+import calculator.DebtCalculator;
+import calculator.FromFileDebtCalculator;
 
 public class Main {
     public static void main(String[] args) {

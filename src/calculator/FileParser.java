@@ -7,36 +7,31 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FileParser implements Parser{
-
-    private final Map<String, Map<String, Double>> inputTable = new LinkedHashMap<>();
-    private final Map<String, Integer> namesOrder = new LinkedHashMap<>();
-    private final Map<Integer, String> namesOrderReverse = new LinkedHashMap<>();
+public class FileParser implements Parser {
+    private final Map<String, Double> credit = new LinkedHashMap<>();
+    private final Map<String, Double> debit = new LinkedHashMap<>();
+    private final Map<String, Integer> namesRowIndex = new LinkedHashMap<>();
+    private final Map<String, Map<String, Double>> outputTable = new LinkedHashMap<>();
 
     @Override
     public void readInputFile(String inputFilePath) {
-
         try {
             List<String> inputFileLines = Files.readAllLines(Path.of(inputFilePath));
             String[] headerLine = inputFileLines.get(0).split(",");
-            //Начальное заполнение структур
             for (int debtorNumber = 2; debtorNumber < headerLine.length; debtorNumber++) {
                 String name = headerLine[debtorNumber].trim();
-                namesOrder.put(name, debtorNumber);
-                namesOrderReverse.put(debtorNumber, name);
+                debit.put(name, 0.0);
+                credit.put(name, 0.0);
+                namesRowIndex.put(name, debtorNumber);
                 Map<String, Double> innerMap = new LinkedHashMap<>();
-                inputTable.put(name, innerMap);
+                outputTable.put(name, innerMap);
             }
-            //Начальное заполнение внутренних мап нулями
-            for (String lineName : namesOrder.keySet()) {
-                for (String columnName : namesOrder.keySet()) {
-                    inputTable.get(lineName).put(columnName, 0.0);
+            for (String lineName : namesRowIndex.keySet()) {
+                for (String columnName : namesRowIndex.keySet()) {
+                    outputTable.get(lineName).put(columnName, 0.0);
                 }
             }
-            //Заполнение мапы, представляющей выходной файл, данными из строк входного файла
             for (int inputLineNumber = 1; inputLineNumber < inputFileLines.size(); inputLineNumber++) {
-                /*Считывание строки входного файла, добавление нулей вместо пропусков данных для избежания ошибок
-                и удобства последующего вывода*/
                 String currentLine = inputFileLines.get(inputLineNumber).replaceAll(",$", ",0");
                 String[] currentLineArray = currentLine.split(",");
                 for (int i = 0; i < currentLineArray.length; i++) {
@@ -45,22 +40,15 @@ public class FileParser implements Parser{
                     }
                 }
                 String creditor = currentLineArray[0];
-                for (String debtor : namesOrder.keySet()) {
-                    Map<String, Double> inputLine;
-                    Double debtAmount = Double.parseDouble(currentLineArray[namesOrder.get(debtor)]);
-
-                    if (inputTable.get(debtor) == null) {
-                        inputLine = new LinkedHashMap<>();
-                        inputLine.put(creditor, Double.parseDouble(currentLineArray[namesOrder.get(debtor)]));
-                    } else {
-                        inputLine = inputTable.get(debtor);
-                        if (inputLine.containsKey(creditor)) {
-                            debtAmount += inputLine.get(creditor);
-                        }
-                        inputLine.put(creditor, debtAmount);
-                    }
-                    inputTable.put(debtor, inputLine);
+                Double pastCredit = credit.get(creditor);
+                Double currentCredit = 0.0;
+                for (String debtor : namesRowIndex.keySet()) {
+                    Double pastDebit = debit.get(debtor);
+                    Double currentDebit = Double.parseDouble(currentLineArray[namesRowIndex.get(debtor)]);
+                    debit.put(debtor, pastDebit + currentDebit);
+                    currentCredit += currentDebit;
                 }
+                credit.put(creditor, pastCredit + currentCredit);
             }
         } catch (IOException e) {
             System.out.println("Невозможно прочитать файл!");
@@ -68,15 +56,17 @@ public class FileParser implements Parser{
         }
     }
 
-    public Map<String, Map<String, Double>> getTable() {
-        return inputTable;
+    @Override
+    public Map<String, Double> getCredit() {
+        return credit;
     }
 
-    public Map<String, Integer> getNamesOrder() {
-        return namesOrder;
+    @Override
+    public Map<String, Double> getDebit() {
+        return debit;
     }
 
-    public Map<Integer, String> getNamesOrderReverse() {
-        return namesOrderReverse;
+    public Map<String, Map<String, Double>> getOutputTable() {
+        return outputTable;
     }
 }
