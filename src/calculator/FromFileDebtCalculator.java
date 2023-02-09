@@ -10,7 +10,9 @@ public class FromFileDebtCalculator implements DebtCalculator {
     private final Map<String, Map<String, Double>> outputTable;
     private final Printer filePrinter;
 
-    public FromFileDebtCalculator(String inputFilePath) {
+    private final String outputFilePath;
+
+    public FromFileDebtCalculator(String inputFilePath, String outputFilePath) {
         Parser fileParser = new FileParser();
         fileParser.readInputFile(inputFilePath);
         creditMap = fileParser.getCredit();
@@ -18,6 +20,7 @@ public class FromFileDebtCalculator implements DebtCalculator {
         names = debitMap.keySet();
         outputTable = fileParser.getOutputTable();
         filePrinter = new FilePrinter();
+        this.outputFilePath = outputFilePath;
     }
 
     private void reduceDebitsAndCredits() {
@@ -103,8 +106,7 @@ public class FromFileDebtCalculator implements DebtCalculator {
     public void run() {
 //        calculateDebts();
         calculateDebtsByMax();
-
-        filePrinter.writeToFile(names, outputTable);
+        filePrinter.writeToFile(names, outputTable, outputFilePath);
         filePrinter.print(outputTable);
     }
 }

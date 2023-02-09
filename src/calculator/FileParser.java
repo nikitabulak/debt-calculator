@@ -52,6 +52,7 @@ public class FileParser implements Parser {
             }
         } catch (IOException e) {
             System.out.println("Невозможно прочитать файл!");
+            System.out.println(e.getMessage());
             System.exit(404);
         }
     }

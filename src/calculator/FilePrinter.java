@@ -21,7 +21,7 @@ public class FilePrinter implements Printer {
     }
 
     @Override
-    public void writeToFile(Set<String> namesOrder, Map<String, Map<String, Double>> outputTable) {
+    public void writeToFile(Set<String> namesOrder, Map<String, Map<String, Double>> outputTable, String outputFilePath) {
         List<String> outputFileLines = new ArrayList<>();
         String headerLine = "";
         for (String name : namesOrder) {
@@ -37,10 +37,11 @@ public class FilePrinter implements Printer {
             outputFileLines.add(newLine);
         }
         try {
-            if (!Files.exists(Path.of(".\\resourses\\output.csv"))) {
-                Files.createFile(Path.of(".\\resourses\\output.csv"));
+            Path path = Path.of(outputFilePath);
+            if (!Files.exists(path)) {
+                Files.createFile(path);
             }
-            Files.write(Path.of(".\\resourses\\output.csv"), outputFileLines);
+            Files.write(path, outputFileLines);
         } catch (Exception e) {
             e.printStackTrace();
         }
